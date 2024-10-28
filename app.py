@@ -1,6 +1,14 @@
-from flask import Flask, render_template, request
+from flask import Flask, jsonify, render_template, request
+from flask_cors import CORS
+from flask_wtf.csrf import CSRFProtect
+
+
+
 
 app = Flask(__name__)
+CORS(app)
+csrf = CSRFProtect(app)
+playlists = {}
 
 class Song:
     def __init__(self, title, artist, genre):
@@ -21,6 +29,8 @@ class Playlist:
     def __init__(self, name):
         self.name = name
         self.head = None
+        self.prev = None
+
 
     def add_song(self, song):
         new_node = Node(song)
@@ -79,7 +89,7 @@ class Playlist:
     def search_song(self, song_title):
         current = self.head
         while current is not None:
-            if current.song_title == song_title:
+            if current.song.title == song_title:
                 return current
             current = current.next
         return None
@@ -88,7 +98,7 @@ class Playlist:
         songs = []
         current = self.head
         while current:
-            songs.append(str(current.data))
+            songs.append(str(current.song))
             current = current.next
         return songs
 
@@ -104,23 +114,24 @@ class Playlist:
     #         print("------------------------------")
     #         current = current.next
 
-playlists = {}
-
+@csrf.exempt
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        playlist_name = request.form['playlist_name']
-        song_title = request.form['song_title']
-        song_artist = request.form['song_artist']
-        song_genre = request.form['song_genre']
+        data = request.get_json()
+        playlist_name = data.get('playlist_name')
+        song_title = data.get['song_title']
+        song_artist = data.get['song_artist']
+        song_genre = data.get['song_genre']
 
         if playlist_name not in playlists:
             playlists[playlist_name] = Playlist(playlist_name)
+            print("Created a new playlist")
 
         playlist = playlists[playlist_name]
         playlist.add_song(Song(song_title, song_artist, song_genre))
-
-    return render_template('index.html', playlists=playlists)
+        return jsonify({"message": "Song added successfully."}), 201
+    return jsonify({"message": "Index working"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
