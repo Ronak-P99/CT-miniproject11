@@ -1,13 +1,8 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from flask_wtf.csrf import CSRFProtect
-
-
-
 
 app = Flask(__name__)
 CORS(app)
-csrf = CSRFProtect(app)
 playlists = {}
 
 class Song:
@@ -114,15 +109,14 @@ class Playlist:
     #         print("------------------------------")
     #         current = current.next
 
-@csrf.exempt
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         data = request.get_json()
         playlist_name = data.get('playlist_name')
-        song_title = data.get['song_title']
-        song_artist = data.get['song_artist']
-        song_genre = data.get['song_genre']
+        song_title = data.get('song_title')
+        song_artist = data.get('song_artist')
+        song_genre = data.get('song_genre')
 
         if playlist_name not in playlists:
             playlists[playlist_name] = Playlist(playlist_name)
